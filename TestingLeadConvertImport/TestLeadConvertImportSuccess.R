@@ -3,42 +3,36 @@
 
 
 # Load Libraries
-library(shiny)
-library(miniUI)
 library(salesforcer)
-library(dbplyr)
-library(ggplot2)
 library(dplyr)
 library(readr)
-library(tibble)
 library(tidyr)
-library(purrr)
 library(stringr)
-library(forcats)
 
 # For debugging
-# print(getwd())
-# 
+print(getwd())
+ 
 # Setting working directory to location of 3rd party export
-# setwd("E:/Projects/TestingLeadConvertImport")
-# 
+
+setwd("E:/Projects/TestingLeadConvertImport")
+
 # For debugging
-# print(getwd())
+print(getwd())
 
 
 # Create Data Frame from csv
 baseData <- read.csv(dir(pattern='')[1])
 
-# # Add Id column for temporary key when debugging
-# orderedData <- tibble::rowid_to_column(baseData, "ID")
+# # Add Id column for temporary key
+orderedData <- tibble::rowid_to_column(baseData, "ID")
 
 
 separatedData <- separate(orderedData, name, into = c("FirstName", "LastName"))
 
 # # For debugging
-# separatedData %>% 
-#   group_by(email) %>% 
-#   filter(n()>1)
+separatedData %>%
+  group_by(email) %>%
+  filter(n()>1)
 
 # Check for duplicates in email, since it is the primary key
 dedupedData <- distinct(separatedData,email, .keep_all = TRUE)
@@ -56,6 +50,7 @@ premData <- within(dedupedData, {
   sfpremium[f] <- 'TRUE'
   sfbasic[f] <- 'TRUE'
 })
+premData <- head(premData)
 
 # premData <- within(premData, {
 #   f <- product == 'SFPremium'
@@ -73,12 +68,17 @@ colnames(prodprepData) <- c("ID", "Email", "FirstName", "LastName", "Age",
                             "Product", "Company", "Date", "SFPremium__c", 
                             "SFBasic__c", "Remove")
 
-prodprepData$Remove <- NULL
-prodprepData$ID <- NULL
-prodprepData$Date <- NULL
-prodprepData$Age <- NULL
-prodprepData$Revenue <- NULL
-prodprepData$Product <- NULL
+prodprepData = prodprepData %>%
+  dplyr::select(-c("Remove", "ID", "Date", "Age", "Revenue", "Product"))
+
+# prodprepData$Remove <- NULL
+# prodprepData$ID <- NULL
+# prodprepData$Date <- NULL
+# prodprepData$Age <- NULL
+# prodprepData$Revenue <- NULL
+# prodprepData$Product <- NULL
+
+
 head(prodprepData)
 # n <- nrow(prodprepData)
 
