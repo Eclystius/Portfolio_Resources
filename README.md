@@ -1,1 +1,1 @@
-Contained in this repository is my Talent Stack Project soon to contain others
+Contained in this repository are projects I have created or worked on with a team
