@@ -26,7 +26,15 @@ baseData <- read.csv(dir(pattern='')[1])
 # # Add Id column for temporary key
 orderedData <- tibble::rowid_to_column(baseData, "ID")
 
+if(all(c("ID", "email", "name", "age", "street", "city", "state", "zip", "dollar", 
+         "product", "company", "date")) %in% colnames(orderedData)) {
+          stop()
+         }
+# ID removed unless debugging needed. Then remove "ID" from the vector.
+prodprepData = prodprepData %>%
+  dplyr::select(-c("Remove", "ID", "Date", "Age", "Revenue", "Product")) 
 
+# This separates first and last names to prepare for record insertion.
 separatedData <- separate(orderedData, name, into = c("FirstName", "LastName"))
 
 # # For debugging
@@ -68,9 +76,6 @@ colnames(prodprepData) <- c("ID", "Email", "FirstName", "LastName", "Age",
                             "Product", "Company", "Date", "SFPremium__c", 
                             "SFBasic__c", "Remove")
 
-prodprepData = prodprepData %>%
-  dplyr::select(-c("Remove", "ID", "Date", "Age", "Revenue", "Product"))
-
 # prodprepData$Remove <- NULL
 # prodprepData$ID <- NULL
 # prodprepData$Date <- NULL
@@ -79,7 +84,10 @@ prodprepData = prodprepData %>%
 # prodprepData$Product <- NULL
 
 
-head(prodprepData)
+# for testing purposes
+testingProdprepData <- slice_head(prodprepData.c("email", "name", "age", "street", "city", "state", "zip", "dollar", 
+                                                 "product", "company", "date"), n=10)
+# head(prodprepData)
 # n <- nrow(prodprepData)
 
 # Authenticate connection with Salesforce Org
