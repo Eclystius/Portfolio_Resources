@@ -26,7 +26,30 @@ baseData <- read.csv(dir(pattern='')[1])
 # # Add Id column for temporary key
 orderedData <- tibble::rowid_to_column(baseData, "ID")
 
+orderedDataColNames <- c("ID", "email", "name", "age", "street", "city", "state", "zip", "dollar", 
+                         "product", "company", "date")
 
+# Testing a more efficient way to check columns
+check_column_names <- function(orderedData, orderedDataColNames) {
+  col_names <- colnames(orderedData)
+  
+  if (identical(col_names, orderedDataColNames)) {
+    message("Column names match the vector.")
+  } else {
+    stop("Column names do not match the vector.")
+  }
+}
+
+
+# Verifying the columns have no changed
+# if(all(c("ID", "email", "name", "age", "street", "city", "state", "zip", "dollar",
+#          "product", "company", "date")) %in% colnames(orderedData)) {
+#           stop()
+#           }
+
+
+
+# This separates first and last names to prepare for record insertion.
 separatedData <- separate(orderedData, name, into = c("FirstName", "LastName"))
 
 # # For debugging
@@ -50,7 +73,7 @@ premData <- within(dedupedData, {
   sfpremium[f] <- 'TRUE'
   sfbasic[f] <- 'TRUE'
 })
-premData <- head(premData)
+# premData <- head(premData)
 
 # premData <- within(premData, {
 #   f <- product == 'SFPremium'
@@ -68,8 +91,9 @@ colnames(prodprepData) <- c("ID", "Email", "FirstName", "LastName", "Age",
                             "Product", "Company", "Date", "SFPremium__c", 
                             "SFBasic__c", "Remove")
 
+# ID removed unless debugging needed. Then remove "ID" from the vector.
 prodprepData = prodprepData %>%
-  dplyr::select(-c("Remove", "ID", "Date", "Age", "Revenue", "Product"))
+  dplyr::select(-c("ID", "Date", "Age", "Revenue", "Product", "Remove")) 
 
 # prodprepData$Remove <- NULL
 # prodprepData$ID <- NULL
@@ -79,7 +103,14 @@ prodprepData = prodprepData %>%
 # prodprepData$Product <- NULL
 
 
-head(prodprepData)
+# for testing purposes
+# testingProdprepData <- slice_head(prodprepData c("email", "name", "age", "street", "city", "state", "zip", "dollar", 
+#                                                  "product", "company", "date"), n=10)
+
+# Pull 10 rows for demonstrating purposes to use smaller data with Salesforce org
+prodprepData <- prodprepData[1:10, ]
+
+# head(prodprepData)
 # n <- nrow(prodprepData)
 
 # Authenticate connection with Salesforce Org
@@ -88,3 +119,4 @@ sf_auth()
 
 new_leads1 <- sf_create(prodprepData, object_name = "Lead", api_type = "Bulk 1.0")
 new_leads1
+
